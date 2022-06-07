@@ -1,4 +1,5 @@
 using Persistence;
+using API.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,11 +7,10 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-builder.Services.AddDbContext<DataContext>(opt=>opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
-builder.Services.AddScoped<IDbInitializer, DbInitializer>();
+
+//Adding Services using extension method
+builder.Services.AddApplicationServices(builder.Configuration);
+
 
 var app = builder.Build();
 
@@ -20,21 +20,23 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-SeedData();
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
 
 app.MapControllers();
 
+using var scope = app.Services.CreateScope();
+try
+{
+    var context = scope.ServiceProvider.GetRequiredService<DataContext>();
+    await context.Database.MigrateAsync(); //Apply all the pending migrations and create db if not exists.
+    await Seed.SeedData(context); //Insert data if not exists.
+}
+catch (Exception e)
+{
+    //add logger
+}
+
 app.Run();
 
 
-void SeedData()
-{
-    using(var scope=app.Services.CreateScope())
-    {
-        var dbInitializer= scope.ServiceProvider.GetRequiredService<IDbInitializer>();
-        dbInitializer.Initialize();
-    }
-}
