@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Persistence;
 
@@ -10,9 +11,10 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20220610022518_IsCalledColumn")]
+    partial class IsCalledColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "6.0.5");
@@ -135,33 +137,6 @@ namespace Persistence.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("Domain.Comment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<Guid?>("ActivityId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("AuthorId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Body")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ActivityId");
-
-                    b.HasIndex("AuthorId");
-
-                    b.ToTable("Comments");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -311,22 +286,6 @@ namespace Persistence.Migrations
                     b.Navigation("AppUser");
                 });
 
-            modelBuilder.Entity("Domain.Comment", b =>
-                {
-                    b.HasOne("Domain.Activity", "Activity")
-                        .WithMany("Comments")
-                        .HasForeignKey("ActivityId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("Domain.AppUser", "Author")
-                        .WithMany()
-                        .HasForeignKey("AuthorId");
-
-                    b.Navigation("Activity");
-
-                    b.Navigation("Author");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -381,8 +340,6 @@ namespace Persistence.Migrations
             modelBuilder.Entity("Domain.Activity", b =>
                 {
                     b.Navigation("Attendees");
-
-                    b.Navigation("Comments");
                 });
 
             modelBuilder.Entity("Domain.AppUser", b =>
